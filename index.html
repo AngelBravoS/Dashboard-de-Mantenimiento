@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Mantenimiento Integral v1.0</title>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon.png">
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <style>
+        :root {
+            --bg-body: #f0f2f5;
+            --bg-card: #ffffff;
+            --primary: #2c3e50;
+            --accent: #007bff;
+            --accent-hover: #0056b3;
+            --accent-moto: #d35400;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --text-main: #333;
+            --text-light: #666;
+            --border: #e1e4e8;
+            --radius: 12px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        /* Estilos para Títulos Editables */
+        [contenteditable="true"] {
+            border-bottom: 1px dashed transparent;
+            transition: border 0.3s, background 0.3s;
+            padding: 0 5px;
+            border-radius: 4px;
+        }
+        [contenteditable="true"]:hover {
+            border-bottom: 1px dashed #ccc;
+            background-color: #f9f9f9;
+            cursor: text;
+        }
+        [contenteditable="true"]:focus {
+            outline: none;
+            background-color: #eef;
+            border-bottom: 1px solid var(--accent);
+        }
+
+        h1 { margin: 0 0 5px 0; color: var(--primary); font-size: 1.8rem; }
+        p.subtitle { margin: 0; color: var(--text-light); font-size: 1rem; }
+
+        .plan-age {
+            font-size: 0.9rem;
+            color: var(--text-main);
+            font-weight: 600;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+        .plan-age strong { color: var(--accent); font-size: 1.1rem; }
+        body.moto-mode .plan-age strong { color: var(--accent-moto); }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+            gap: 20px;
+        }
+
+        .vehicle-toggles { display: flex; gap: 10px; }
+        .data-inputs { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-car { background-color: var(--border); color: var(--text-light); }
+        .btn-car.active { background-color: var(--accent); color: white; box-shadow: 0 4px 8px rgba(0,123,255,0.3); }
+        .btn-moto { background-color: var(--border); color: var(--text-light); }
+        .btn-moto.active { background-color: var(--accent-moto); color: white; box-shadow: 0 4px 8px rgba(211,84,0,0.3); }
+
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-size: 0.85rem; font-weight: bold; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+        input { padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; background: #f9f9f9; transition: border 0.2s; width: 140px;}
+        input:focus { outline: none; border-color: var(--accent); background: #fff; }
+
+        .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 25px; flex-grow: 1; }
+        @media(min-width: 900px) { .dashboard-grid { grid-template-columns: 1fr 1fr; } }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            height: fit-content;
+        }
+
+        h2 { margin-top: 0; padding-bottom: 15px; border-bottom: 2px solid var(--bg-body); color: var(--primary); font-size: 1.4rem; display: flex; align-items: center; justify-content: space-between; }
+        .badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; background: var(--bg-body); color: var(--text-light); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+
+        .task-group { margin-bottom: 25px; }
+        .group-header {
+            font-weight: 700;
+            color: var(--primary);
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 5px solid var(--accent);
+            display: block;
+        }
+        body.moto-mode .group-header { border-left-color: var(--accent-moto); }
+        .group-header.long-term { background-color: #f8d7da; color: #721c24; border-left-color: var(--danger) !important; }
+
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .task-info { flex-grow: 1; margin-right: 10px; }
+        .task-title { font-weight: 600; font-size: 0.95rem; display: block; margin-bottom: 4px; }
+        .task-status { font-size: 0.85rem; display: block; color: #555; }
+        .task-meta { font-size: 0.75rem; color: #888; display: block; margin-top: 2px; font-style: italic;}
+
+        .btn-done {
+            padding: 8px 12px;
+            background-color: var(--accent);
+            color: white;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            box-shadow: none;
+            cursor: pointer;
+            white-space: nowrap;
+            align-self: center;
+            border: 1px solid transparent;
+        }
+        body.moto-mode .btn-done { background-color: var(--accent-moto); }
+        .btn-done:hover { opacity: 0.9; }
+
+        .btn-done.undo-mode {
+            background-color: #fff;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+        .btn-done.undo-mode:hover {
+            background-color: var(--danger);
+            color: #fff;
+        }
+
+        .task-item.status-ok { background-color: #e6ffed; border-left: 4px solid var(--success); }
+        .task-item.status-due { background-color: #fff9db; border-left: 4px solid var(--warning); }
+        .task-item.status-late { background-color: #fff5f5; border-left: 4px solid var(--danger); }
+
+        .long-term-check {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 6px;
+            transition: background 0.1s;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .long-term-check:hover { background-color: #f1f3f5; }
+        .long-term-check input[type="checkbox"] { margin-right: 15px; transform: scale(1.3); cursor: pointer; accent-color: var(--accent); }
+        body.moto-mode .long-term-check input[type="checkbox"] { accent-color: var(--accent-moto); }
+        .long-term-check.completed label { text-decoration: line-through; color: #adb5bd; }
+
+        .long-term-check.warning-imminent {
+            background-color: #fff3cd;
+            border: 1px solid var(--warning);
+        }
+        .long-term-check.warning-imminent label { color: #856404; font-weight: bold; }
+
+        .btn-reset { background-color: #fff; color: #dc3545; border: 2px solid #dc3545; width: 100%; margin-top: 30px; padding: 15px; margin-bottom: 20px;}
+        .btn-reset:hover { background-color: #dc3545; color: white; }
+
+        .footer-version {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .footer-version a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .footer-version a:hover {
+            text-decoration: underline;
+        }
+        body.moto-mode .footer-version a { color: var(--accent-moto); }
+
+        @media (max-width: 600px) {
+            .controls { flex-direction: column; align-items: stretch; }
+            .data-inputs { flex-direction: column; align-items: stretch; }
+            .input-group input { width: 100%; box-sizing: border-box; }
+            .task-item { flex-direction: column; gap: 10px; }
+            .btn-done { width: 100%; text-align: center;}
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <h1 id="main-title" contenteditable="true" spellcheck="false">Dashboard de Mantenimiento</h1>
+        <p id="sub-title" class="subtitle" contenteditable="true" spellcheck="false">Gestión integral con historial de acciones</p>
+
+        <div class="plan-age">
+            Inicio del plan: <span id="plan-start-display">...</span> | Edad del plan: <strong id="plan-age-display">0 años y 0 meses</strong>
+        </div>
+    </header>
+
+    <div class="controls">
+        <div class="vehicle-toggles">
+            <button onclick="setMode('car')" class="btn-car active" id="btn-car">🚗 Coche</button>
+            <button onclick="setMode('moto')" class="btn-moto" id="btn-moto">🏍️ Moto</button>
+        </div>
+
+        <div class="data-inputs">
+            <div class="input-group">
+                <label>Kilometraje Actual</label>
+                <input type="number" id="current-km" placeholder="Ej: 120000" onchange="saveGlobalData(); render();">
+            </div>
+            <div class="input-group">
+                <label>Ref. Último Aceite</label>
+                <input type="date" id="last-service" onchange="saveGlobalData()">
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="card">
+            <h2>Revisiones por Kilometraje <span class="badge">USO</span></h2>
+            <div id="mileage-list"></div>
+        </div>
+
+        <div class="card">
+            <h2>Revisiones por Tiempo <span class="badge">EDAD</span></h2>
+            <div id="time-list"></div>
+        </div>
+    </div>
+
+    <button class="btn-reset" onclick="resetData()">⚠️ Borrar todo y reiniciar sistema</button>
+
+    <div class="footer-version">
+        Garaje Digital &bull; <strong>v1.0</strong> &bull;
+        <a href="https://github.com/tu-usuario/tu-repositorio" target="_blank">Ver en GitHub</a>
+    </div>
+</div>
+
+<script>
+    // --- CONFIGURACIÓN ---
+    const MS_IN_DAY = 86400000;
+    const KM_WARNING_THRESHOLD = 1000;
+
+    // --- DATOS ESTRUCTURADOS ---
+    const DATA = {
+        car: {
+            mileage: [
+                { header: "Cada 3.000 km", intervalKm: 3000, tasks: ["Aditivo Combustible (PEA)"] },
+                { header: "Cada 7.500 km (Base)", intervalKm: 7500, tasks: ["CAMBIO ACEITE + FILTRO", "Revisión visual Filtro Aire"] },
+                { header: "Cada 15.000 km", intervalKm: 15000, tasks: ["Cambio Filtro Aire + Habitáculo", "Rotación de Neumáticos"] },
+                { header: "Cada 30.000 km", intervalKm: 30000, tasks: ["Líquido Frenos + Dirección", "Bujías (Standard)"] },
+                { header: "Cada 45.000 km", intervalKm: 45000, tasks: ["Refrigerante + Termostato"] },
+                { header: "Cada 60.000 km", intervalKm: 60000, tasks: ["Aceite Transmisión (Valvulina)"] }
+            ],
+            time: [
+                { header: "Semanal", intervalDays: 7, tasks: ["Presión Neumáticos (Frío)"] },
+                { header: "Quincenal", intervalDays: 14, tasks: ["Nivel Aceite (Varilla)"] },
+                { header: "Mensual", intervalDays: 30, tasks: ["Nivel Refrigerante", "Luces y Limpiaparabrisas", "Inspección fugas vano motor"] },
+                { header: "Trimestral", intervalDays: 90, tasks: ["Aditivo Limpiador (Preventivo)", "Grasa Bornes Batería"] },
+                { header: "Anual", intervalDays: 365, tasks: ["CAMBIO DE ACEITE (Oxidación)", "Revisión Escobillas"] },
+                { header: "Cada 5 Años (Crítico)", isLongTerm: true, milestone: 5, tasks: ["Neumáticos (Fecha DOT)", "Batería (Preventivo)", "Limpieza Radiador"] },
+                { header: "Cada 10 Años (Gran Parada)", isLongTerm: true, milestone: 10, tasks: ["CORREA DISTRIBUCIÓN", "Correa Accesorios", "Amortiguadores", "Carga Gas A/C"] }
+            ]
+        },
+        moto: {
+            mileage: [
+                { header: "Cada 500 km", intervalKm: 500, tasks: ["Limpiar/Engrasar Cadena", "Tensión cadena"] },
+                { header: "Cada 3.500 km (Base)", intervalKm: 3500, tasks: ["CAMBIO ACEITE + FILTRO", "Aditivo Gasolina"] },
+                { header: "Cada 7.000 km", intervalKm: 7000, tasks: ["Cambio Filtro Aire"] },
+                { header: "Cada 10.500 km", intervalKm: 10500, tasks: ["Cambio Bujías"] },
+                { header: "Cada 14.000 km", intervalKm: 14000, tasks: ["Aceite Horquilla + Frenos"] },
+                { header: "Cada 21.000 km", intervalKm: 21000, tasks: ["Kit Arrastre Completo"] },
+                { header: "Cada 40.000 km", intervalKm: 40000, tasks: ["Reglaje Válvulas"] }
+            ],
+            time: [
+                { header: "Semanal", intervalDays: 7, tasks: ["Presión Neumáticos", "Engrase Cadena"] },
+                { header: "Quincenal", intervalDays: 14, tasks: ["Nivel Aceite (Ojo Buey)"] },
+                { header: "Mensual", intervalDays: 30, tasks: ["Nivel Refrigerante", "Retenes Horquilla"] },
+                { header: "Trimestral", intervalDays: 90, tasks: ["Carga Batería (Mantenedor)"] },
+                { header: "Anual", intervalDays: 365, tasks: ["CAMBIO DE ACEITE (Degradación)"] },
+                { header: "Cada 5 Años", isLongTerm: true, milestone: 5, tasks: ["Neumáticos (Goma dura)", "Latiguillos Metálicos", "Limpieza circuito Refr."] },
+                { header: "Cada 10 Años", isLongTerm: true, milestone: 10, tasks: ["REGLAJE VÁLVULAS (Muelles)", "Rodamientos Dirección/Ruedas", "Suspensión Trasera"] }
+            ]
+        }
+    };
+
+    // --- ESTADO ---
+    let appState = {
+        mode: 'car',
+        km: 0,
+        lastService: '',
+        planStartDate: null,
+        mainTitle: 'Dashboard de Mantenimiento',
+        subTitle: 'Gestión integral con historial de acciones',
+        checks: {},
+        trackingKm: {},
+        trackingTime: {}
+    };
+
+    window.onload = function() {
+        loadData();
+        setupTitleListeners();
+        render();
+    };
+
+    function setupTitleListeners() {
+        const titleEl = document.getElementById('main-title');
+        const subEl = document.getElementById('sub-title');
+
+        titleEl.addEventListener('input', function() {
+            appState.mainTitle = this.innerText;
+            saveGlobalData();
+        });
+
+        subEl.addEventListener('input', function() {
+            appState.subTitle = this.innerText;
+            saveGlobalData();
+        });
+    }
+
+    function loadData() {
+        // CAMBIAMOS A V1.0
+        const saved = localStorage.getItem('mantenimientoIntegralV1_0');
+
+        if (!saved) {
+            // Migración desde la v3 (si la usaste)
+            const oldSaved = localStorage.getItem('mantenimientoIntegralV3');
+            if (oldSaved) {
+                migrateData(JSON.parse(oldSaved));
+            } else {
+                appState.planStartDate = getTodayString();
+            }
+        } else {
+            appState = JSON.parse(saved);
+        }
+
+        appState.km = parseInt(appState.km) || 0;
+        if (!appState.trackingKm) appState.trackingKm = {};
+        if (!appState.trackingTime) appState.trackingTime = {};
+
+        if (appState.mainTitle) document.getElementById('main-title').innerText = appState.mainTitle;
+        if (appState.subTitle) document.getElementById('sub-title').innerText = appState.subTitle;
+
+        if(appState.mode === 'moto') document.body.classList.add('moto-mode');
+    }
+
+    function migrateData(oldData) {
+        appState = oldData;
+        saveGlobalData();
+    }
+
+    function saveGlobalData() {
+        appState.km = parseInt(document.getElementById('current-km').value) || 0;
+        appState.lastService = document.getElementById('last-service').value;
+        localStorage.setItem('mantenimientoIntegralV1_0', JSON.stringify(appState));
+    }
+
+    function getTodayString() {
+        const d = new Date();
+        return d.toISOString().split('T')[0];
+    }
+
+    function formatDate(str) {
+        if(!str) return "Nunca";
+        const parts = str.split('-');
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+
+    function getPlanAge() {
+        if (!appState.planStartDate) return {y:0, m:0};
+        const start = new Date(appState.planStartDate);
+        const now = new Date();
+        const diffTime = Math.abs(now - start);
+        const totalDays = Math.ceil(diffTime / MS_IN_DAY);
+        const years = Math.floor(totalDays / 365);
+        const months = Math.floor((totalDays % 365) / 30);
+        return { y: years, m: months, totalYears: totalDays/365 };
+    }
+
+    function getLastValue(trackingObj, id) {
+        if (!trackingObj[id] || !Array.isArray(trackingObj[id]) || trackingObj[id].length === 0) return 0;
+        return trackingObj[id][trackingObj[id].length - 1];
+    }
+
+    function getLastDate(trackingObj, id) {
+         if (!trackingObj[id] || !Array.isArray(trackingObj[id]) || trackingObj[id].length === 0) return null;
+        return trackingObj[id][trackingObj[id].length - 1];
+    }
+
+    function render() {
+        document.getElementById('current-km').value = appState.km || '';
+        document.getElementById('last-service').value = appState.lastService;
+
+        const age = getPlanAge();
+        document.getElementById('plan-start-display').textContent = formatDate(appState.planStartDate);
+        document.getElementById('plan-age-display').textContent = `${age.y} años y ${age.m} meses`;
+
+        const mode = appState.mode;
+        document.body.classList.toggle('moto-mode', mode === 'moto');
+        document.getElementById('btn-car').classList.toggle('active', mode === 'car');
+        document.getElementById('btn-moto').classList.toggle('active', mode === 'moto');
+
+        const data = DATA[mode];
+        renderMileageColumn(data.mileage);
+        renderTimeColumn(data.time);
+    }
+
+    function renderMileageColumn(groups) {
+        const container = document.getElementById('mileage-list');
+        container.innerHTML = '';
+
+        groups.forEach((group, gIndex) => {
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'task-group';
+            groupDiv.innerHTML = `<span class="group-header">${group.header}</span>`;
+
+            group.tasks.forEach((taskText, tIndex) => {
+                const id = `km-${appState.mode}-${gIndex}-${tIndex}`;
+                const lastKm = getLastValue(appState.trackingKm, id);
+                const interval = group.intervalKm;
+                const currentKm = appState.km;
+                const nextDue = lastKm + interval;
+                const remaining = nextDue - currentKm;
+
+                let btnText = `Hecho a los ${currentKm.toLocaleString()} km`;
+                let btnClass = "btn-done";
+                let btnAction = `markKm('${id}')`;
+
+                if (lastKm === currentKm && lastKm !== 0) {
+                    btnText = "✖ Deshacer (Último)";
+                    btnClass += " undo-mode";
+                    btnAction = `unmarkKm('${id}')`;
+                }
+
+                let statusClass = '';
+                let statusMsg = '';
+
+                if (lastKm === 0) {
+                    statusClass = 'status-late';
+                    statusMsg = `🚨 Sin registro previo.`;
+                } else if (currentKm >= nextDue) {
+                    statusClass = 'status-late';
+                    statusMsg = `⛔ Pasado por ${Math.abs(remaining)} km.`;
+                } else if (remaining <= KM_WARNING_THRESHOLD) {
+                    statusClass = 'status-due';
+                    statusMsg = `⚠️ Toca en ${remaining} km.`;
+                } else {
+                    statusClass = 'status-ok';
+                    statusMsg = `✅ Faltan ${remaining} km.`;
+                }
+
+                const item = document.createElement('div');
+                item.className = `task-item ${statusClass}`;
+                item.innerHTML = `
+                    <div class="task-info">
+                        <span class="task-title">${taskText}</span>
+                        <span class="task-status">${statusMsg}</span>
+                        <span class="task-meta">Último: ${lastKm.toLocaleString()} km | Próx: ${nextDue.toLocaleString()} km</span>
+                    </div>
+                    <button class="${btnClass}" onclick="${btnAction}">${btnText}</button>
+                `;
+                groupDiv.appendChild(item);
+            });
+            container.appendChild(groupDiv);
+        });
+    }
+
+    function renderTimeColumn(groups) {
+        const container = document.getElementById('time-list');
+        container.innerHTML = '';
+
+        groups.forEach((group, gIndex) => {
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'task-group';
+            const isLong = group.isLongTerm;
+            groupDiv.innerHTML = `<span class="group-header ${isLong ? 'long-term' : ''}">${group.header}</span>`;
+
+            group.tasks.forEach((taskText, tIndex) => {
+                const id = `time-${appState.mode}-${gIndex}-${tIndex}`;
+
+                if (isLong) {
+                    const isChecked = appState.checks[id] || false;
+                    const ageObj = getPlanAge();
+                    let warnClass = '';
+                    if (!isChecked && (ageObj.totalYears >= group.milestone - 0.25)) {
+                        warnClass = 'warning-imminent';
+                    }
+
+                    const item = document.createElement('div');
+                    item.className = `long-term-check ${isChecked ? 'completed' : ''} ${warnClass}`;
+                    item.onclick = (e) => { if(e.target.type !== 'checkbox') toggleCheck(id); };
+                    item.innerHTML = `
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCheck('${id}')">
+                        <label>${taskText}</label>
+                    `;
+                    groupDiv.appendChild(item);
+
+                } else {
+                    const lastDate = getLastDate(appState.trackingTime, id);
+                    const today = getTodayString();
+                    const daysAgo = lastDate ? Math.floor((new Date() - new Date(lastDate)) / MS_IN_DAY) : Infinity;
+                    const interval = group.intervalDays;
+
+                    let btnText = "Hecho Hoy";
+                    let btnClass = "btn-done";
+                    let btnAction = `markTime('${id}')`;
+
+                    if (lastDate === today) {
+                        btnText = "✖ Deshacer (Hoy)";
+                        btnClass += " undo-mode";
+                        btnAction = `unmarkTime('${id}')`;
+                    }
+
+                    let statusClass = '';
+                    let statusMsg = '';
+                    if (daysAgo === Infinity) {
+                        statusClass = 'status-late';
+                        statusMsg = '🚨 Nunca realizado.';
+                    } else if (daysAgo > interval) {
+                        statusClass = 'status-late';
+                        statusMsg = `⛔ Hace ${daysAgo} días (Vencido).`;
+                    } else if (daysAgo > interval * 0.85) {
+                        statusClass = 'status-due';
+                        statusMsg = `⚠️ Toca pronto (Hace ${daysAgo} días).`;
+                    } else {
+                        statusClass = 'status-ok';
+                        statusMsg = `✅ Al día (Hace ${daysAgo} días).`;
+                    }
+
+                    const item = document.createElement('div');
+                    item.className = `task-item ${statusClass}`;
+                    item.innerHTML = `
+                        <div class="task-info">
+                            <span class="task-title">${taskText}</span>
+                            <span class="task-status">${statusMsg}</span>
+                            <span class="task-meta">Renovar cada ${interval} días</span>
+                        </div>
+                        <button class="${btnClass}" onclick="${btnAction}">${btnText}</button>
+                    `;
+                    groupDiv.appendChild(item);
+                }
+            });
+            container.appendChild(groupDiv);
+        });
+    }
+
+    function markKm(id) {
+        const current = parseInt(document.getElementById('current-km').value);
+        if (!current || current <= 0) {
+            alert("Introduce primero tu KM actual arriba.");
+            return;
+        }
+        if (!Array.isArray(appState.trackingKm[id])) appState.trackingKm[id] = [];
+        const history = appState.trackingKm[id];
+        if (history.length === 0 || history[history.length - 1] !== current) {
+            history.push(current);
+            history.sort((a, b) => a - b);
+        }
+        saveGlobalData();
+        render();
+    }
+
+    function unmarkKm(id) {
+        if (Array.isArray(appState.trackingKm[id])) appState.trackingKm[id].pop();
+        saveGlobalData();
+        render();
+    }
+
+    function markTime(id) {
+        if (!Array.isArray(appState.trackingTime[id])) appState.trackingTime[id] = [];
+        const today = getTodayString();
+        const history = appState.trackingTime[id];
+        if (history.length === 0 || history[history.length - 1] !== today) {
+            history.push(today);
+        }
+        saveGlobalData();
+        render();
+    }
+
+    function unmarkTime(id) {
+        if (Array.isArray(appState.trackingTime[id])) appState.trackingTime[id].pop();
+        saveGlobalData();
+        render();
+    }
+
+    function toggleCheck(id) {
+        appState.checks[id] = !appState.checks[id];
+        saveGlobalData();
+        render();
+    }
+
+    function setMode(m) {
+        appState.mode = m;
+        saveGlobalData();
+        render();
+    }
+
+    function resetData() {
+        if(confirm("¿Borrar TODOS los datos? Se perderá el historial.")) {
+            localStorage.removeItem('mantenimientoIntegralV1_0');
+            location.reload();
+        }
+    }
+</script>
+
+</body>
+</html>
