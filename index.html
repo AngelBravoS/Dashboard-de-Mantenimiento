@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Mantenimiento Integral v1.0</title>
+    <title>Dashboard de Mantenimiento Integral v1.1</title>
 
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon.png">
@@ -58,7 +58,6 @@
             box-shadow: var(--shadow);
         }
 
-        /* Estilos para Títulos Editables */
         [contenteditable="true"] {
             border-bottom: 1px dashed transparent;
             transition: border 0.3s, background 0.3s;
@@ -223,25 +222,42 @@
         .btn-reset { background-color: #fff; color: #dc3545; border: 2px solid #dc3545; width: 100%; margin-top: 30px; padding: 15px; margin-bottom: 20px;}
         .btn-reset:hover { background-color: #dc3545; color: white; }
 
+        /* FOOTER CON ESTILO Y GPL */
         .footer-version {
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             font-size: 0.85rem;
             color: var(--text-light);
             margin-top: 20px;
-            padding-top: 15px;
+            padding-top: 20px;
             border-top: 1px solid var(--border);
             margin-bottom: 20px;
+            gap: 15px;
         }
 
         .footer-version a {
-            color: var(--accent);
+            color: var(--text-light);
             text-decoration: none;
-            font-weight: 600;
+            border-bottom: 1px dotted var(--text-light);
+            transition: color 0.2s;
         }
         .footer-version a:hover {
-            text-decoration: underline;
+            color: var(--accent);
+            border-bottom-style: solid;
         }
-        body.moto-mode .footer-version a { color: var(--accent-moto); }
+
+        /* Icono GitHub SVG */
+        .github-icon {
+            width: 24px;
+            height: 24px;
+            fill: var(--text-light);
+            transition: fill 0.3s;
+            vertical-align: middle;
+        }
+        .github-link { border: none !important; } /* Quitar subrayado al icono */
+        .github-link:hover .github-icon { fill: var(--accent); }
+        body.moto-mode .github-link:hover .github-icon { fill: var(--accent-moto); }
 
         @media (max-width: 600px) {
             .controls { flex-direction: column; align-items: stretch; }
@@ -297,8 +313,13 @@
     <button class="btn-reset" onclick="resetData()">⚠️ Borrar todo y reiniciar sistema</button>
 
     <div class="footer-version">
-        Garaje Digital &bull; <strong>v1.0</strong> &bull;
-        <a href="https://github.com/tu-usuario/tu-repositorio" target="_blank">Ver en GitHub</a>
+        <span>Garaje Digital &bull; <strong>v1.1</strong> &bull; Licencia <a href="LICENSE" target="_blank" title="Ver Licencia GNU GPLv3">GPLv3</a></span>
+
+        <a href="https://github.com/tu-usuario/tu-repositorio" target="_blank" class="github-link" title="Ver código fuente en GitHub">
+            <svg class="github-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/>
+            </svg>
+        </a>
     </div>
 </div>
 
@@ -359,8 +380,8 @@
         mainTitle: 'Dashboard de Mantenimiento',
         subTitle: 'Gestión integral con historial de acciones',
         checks: {},
-        trackingKm: {},
-        trackingTime: {}
+        trackingKm: {},    // Arrays
+        trackingTime: {}   // Arrays
     };
 
     window.onload = function() {
@@ -385,11 +406,10 @@
     }
 
     function loadData() {
-        // CAMBIAMOS A V1.0
-        const saved = localStorage.getItem('mantenimientoIntegralV1_0');
+        const saved = localStorage.getItem('mantenimientoIntegralV1_1');
 
         if (!saved) {
-            // Migración desde la v3 (si la usaste)
+            // Migración desde v3 si existe
             const oldSaved = localStorage.getItem('mantenimientoIntegralV3');
             if (oldSaved) {
                 migrateData(JSON.parse(oldSaved));
@@ -418,7 +438,7 @@
     function saveGlobalData() {
         appState.km = parseInt(document.getElementById('current-km').value) || 0;
         appState.lastService = document.getElementById('last-service').value;
-        localStorage.setItem('mantenimientoIntegralV1_0', JSON.stringify(appState));
+        localStorage.setItem('mantenimientoIntegralV1_1', JSON.stringify(appState));
     }
 
     function getTodayString() {
@@ -663,7 +683,7 @@
 
     function resetData() {
         if(confirm("¿Borrar TODOS los datos? Se perderá el historial.")) {
-            localStorage.removeItem('mantenimientoIntegralV1_0');
+            localStorage.removeItem('mantenimientoIntegralV1_1');
             location.reload();
         }
     }
