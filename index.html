@@ -2,16 +2,17 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard de Mantenimiento Integral de Vehículos</title>
 
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon.png">
     <meta name="theme-color" content="#2c3e50">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
-        /* --- VARIABLES DE COLOR (MODO CLARO) --- */
+        /* --- VARIABLES --- */
         :root {
             --bg-body: #f0f2f5;
             --bg-card: #ffffff;
@@ -25,47 +26,37 @@
             --radius: 12px;
             --shadow: 0 4px 6px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.1);
 
-            /* Estados (Fondos suaves) */
             --bg-ok: #e6ffed; --border-ok: #28a745;
             --bg-warn: #fff9db; --border-warn: #ffc107;
             --bg-late: #fff5f5; --border-late: #dc3545;
-
-            /* Toggle Switch */
-            --toggle-bg: #ddd;
-            --toggle-icon: #f1c40f;
         }
 
-        /* --- VARIABLES DE COLOR (MODO OSCURO) --- */
         body.dark-mode {
             --bg-body: #121212;
             --bg-card: #1e1e1e;
             --text-main: #e0e0e0;
             --text-light: #a0a0a0;
-            --primary: #ecf0f1; /* Texto encabezados más claro */
-            --accent: #4dabf7;  /* Azul más brillante para fondo oscuro */
+            --primary: #ecf0f1;
+            --accent: #4dabf7;
             --accent-hover: #339af0;
             --accent-moto: #ff922b;
             --border: #333333;
             --shadow: 0 4px 6px rgba(0,0,0,0.3);
 
-            /* Estados (Fondos oscuros pero con tinte) */
             --bg-ok: #0b2e13; --border-ok: #28a745;
             --bg-warn: #332701; --border-warn: #ffc107;
             --bg-late: #2c0b0e; --border-late: #dc3545;
-
-            --toggle-bg: #444;
-            --toggle-icon: #f1c40f;
         }
 
-        body {
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
             -webkit-font-smoothing: antialiased;
-            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
         }
 
         .app-container {
@@ -78,9 +69,10 @@
             display: flex;
             flex-direction: column;
             position: relative;
+            overflow-y: auto; /* Asegura scroll en PWA */
         }
 
-        /* HEADER & TOGGLE */
+        /* HEADER */
         header {
             text-align: center;
             margin-bottom: 20px;
@@ -105,29 +97,14 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            transition: background 0.2s;
         }
-        .theme-toggle:hover { background-color: var(--bg-body); }
         .theme-icon { width: 24px; height: 24px; fill: var(--text-main); }
 
-        [contenteditable="true"] {
-            border-bottom: 1px dashed transparent;
-            padding: 0 5px;
-            border-radius: 4px;
-        }
-        [contenteditable="true"]:hover {
-            border-bottom: 1px dashed var(--text-light);
-            background-color: rgba(0,0,0,0.05);
-            cursor: text;
-        }
-        [contenteditable="true"]:focus {
-            outline: none;
-            background-color: rgba(0,0,0,0.05);
-            border-bottom: 1px solid var(--accent);
-        }
+        [contenteditable="true"]:hover { background-color: rgba(0,0,0,0.05); cursor: text; border-radius: 4px; }
+        [contenteditable="true"]:focus { outline: none; border-bottom: 1px solid var(--accent); }
 
-        h1 { margin: 0 0 5px 0; color: var(--primary); font-size: 1.8rem; }
-        p.subtitle { margin: 0; color: var(--text-light); font-size: 1rem; }
+        h1 { margin: 0 0 5px 0; color: var(--primary); font-size: 1.6rem; line-height: 1.3; }
+        p.subtitle { margin: 0; color: var(--text-light); font-size: 0.95rem; }
 
         .plan-age {
             font-size: 0.9rem;
@@ -140,7 +117,7 @@
         .plan-age strong { color: var(--accent); font-size: 1.1rem; }
         body.moto-mode .plan-age strong { color: var(--accent-moto); }
 
-        /* CONTROLES PRINCIPALES */
+        /* CONTROLES */
         .controls {
             display: flex;
             flex-wrap: wrap;
@@ -169,10 +146,9 @@
         }
 
         .btn-car { background-color: var(--bg-body); color: var(--text-light); border: 1px solid var(--border); }
-        .btn-car.active { background-color: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 8px rgba(0,123,255,0.3); }
-
+        .btn-car.active { background-color: var(--accent); color: white; border-color: var(--accent); }
         .btn-moto { background-color: var(--bg-body); color: var(--text-light); border: 1px solid var(--border); }
-        .btn-moto.active { background-color: var(--accent-moto); color: white; border-color: var(--accent-moto); box-shadow: 0 4px 8px rgba(211,84,0,0.3); }
+        .btn-moto.active { background-color: var(--accent-moto); color: white; border-color: var(--accent-moto); }
 
         .input-group { display: flex; flex-direction: column; gap: 5px; }
         .input-group label { font-size: 0.85rem; font-weight: bold; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -184,16 +160,13 @@
             font-size: 1rem;
             background: var(--bg-body);
             color: var(--text-main);
-            transition: border 0.2s;
             width: 140px;
         }
-        input:focus { outline: none; border-color: var(--accent); }
-        /* Invertir el icono de calendario en dark mode para que se vea */
         body.dark-mode input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
 
-        /* --- PESTAÑAS MÓVIL (OCULTAS EN PC) --- */
+        /* PESTAÑAS MÓVIL */
         .mobile-tabs {
-            display: none; /* Por defecto oculto */
+            display: none;
             margin-bottom: 15px;
             background: var(--bg-card);
             border-radius: var(--radius);
@@ -204,7 +177,6 @@
         .tab-btn {
             flex: 1;
             padding: 15px;
-            text-align: center;
             background: none;
             border: none;
             border-bottom: 3px solid transparent;
@@ -215,17 +187,10 @@
             box-shadow: none;
         }
 
-        .tab-btn.active-tab {
-            color: var(--accent);
-            border-bottom-color: var(--accent);
-            background-color: rgba(0,0,0,0.02);
-        }
-        body.moto-mode .tab-btn.active-tab {
-            color: var(--accent-moto);
-            border-bottom-color: var(--accent-moto);
-        }
+        .tab-btn.active-tab { color: var(--accent); border-bottom-color: var(--accent); background-color: rgba(0,0,0,0.02); }
+        body.moto-mode .tab-btn.active-tab { color: var(--accent-moto); border-bottom-color: var(--accent-moto); }
 
-        /* GRID DASHBOARD */
+        /* GRID */
         .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; flex-grow: 1; }
 
         .card {
@@ -239,7 +204,7 @@
         h2 { margin-top: 0; padding-bottom: 15px; border-bottom: 2px solid var(--bg-body); color: var(--primary); font-size: 1.4rem; display: flex; align-items: center; justify-content: space-between; }
         .badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; background: var(--bg-body); color: var(--text-light); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
 
-        /* GRUPOS Y TAREAS */
+        /* TAREAS */
         .task-group { margin-bottom: 25px; }
         .group-header {
             font-weight: 700;
@@ -262,7 +227,6 @@
             margin-bottom: 10px;
             border-radius: 8px;
             border: 1px solid var(--border);
-            transition: all 0.2s;
             background-color: var(--bg-card);
         }
 
@@ -271,7 +235,6 @@
         .task-status { font-size: 0.85rem; display: block; color: var(--text-main); opacity: 0.8; }
         .task-meta { font-size: 0.75rem; color: var(--text-light); display: block; margin-top: 2px; font-style: italic;}
 
-        /* BOTONES DE ACCIÓN */
         .btn-done {
             padding: 8px 12px;
             background-color: var(--accent);
@@ -285,30 +248,19 @@
             border: 1px solid transparent;
         }
         body.moto-mode .btn-done { background-color: var(--accent-moto); }
-        .btn-done:hover { opacity: 0.9; }
 
-        .btn-done.undo-mode {
-            background-color: transparent;
-            color: var(--danger);
-            border: 1px solid var(--danger);
-        }
-        .btn-done.undo-mode:hover {
-            background-color: var(--danger);
-            color: white;
-        }
+        .btn-done.undo-mode { background-color: transparent; color: var(--danger); border: 1px solid var(--danger); }
+        .btn-done.undo-mode:hover { background-color: var(--danger); color: white; }
 
-        /* ESTADOS SEMÁFORO */
         .task-item.status-ok { background-color: var(--bg-ok); border-left: 4px solid var(--border-ok); }
         .task-item.status-due { background-color: var(--bg-warn); border-left: 4px solid var(--border-warn); }
         .task-item.status-late { background-color: var(--bg-late); border-left: 4px solid var(--border-late); }
 
-        /* CHECKBOX LARGO PLAZO */
         .long-term-check {
             display: flex;
             align-items: center;
             padding: 10px;
             border-radius: 6px;
-            transition: background 0.1s;
             cursor: pointer;
             border: 1px solid transparent;
         }
@@ -317,15 +269,11 @@
         body.moto-mode .long-term-check input[type="checkbox"] { accent-color: var(--accent-moto); }
         .long-term-check.completed label { text-decoration: line-through; color: var(--text-light); opacity: 0.7; }
 
-        .long-term-check.warning-imminent {
-            background-color: var(--bg-warn);
-            border: 1px solid var(--border-warn);
-        }
+        .long-term-check.warning-imminent { background-color: var(--bg-warn); border: 1px solid var(--border-warn); }
         .long-term-check.warning-imminent label { color: #d35400; font-weight: bold; }
         body.dark-mode .long-term-check.warning-imminent label { color: #ffc107; }
 
         .btn-reset { background-color: transparent; color: var(--danger); border: 2px solid var(--danger); width: 100%; margin-top: 30px; padding: 15px; margin-bottom: 20px;}
-        .btn-reset:hover { background-color: var(--danger); color: white; }
 
         /* FOOTER */
         .footer-version {
@@ -341,30 +289,15 @@
             gap: 15px;
             flex-wrap: wrap;
         }
+        .footer-version a { color: var(--text-light); text-decoration: none; border-bottom: 1px dotted var(--text-light); }
+        .footer-version a:hover { color: var(--accent); border-bottom-style: solid; }
 
-        .footer-version a {
-            color: var(--text-light);
-            text-decoration: none;
-            border-bottom: 1px dotted var(--text-light);
-            transition: color 0.2s;
-        }
-        .footer-version a:hover {
-            color: var(--accent);
-            border-bottom-style: solid;
-        }
-
-        .github-icon {
-            width: 24px;
-            height: 24px;
-            fill: var(--text-light);
-            transition: fill 0.3s;
-            vertical-align: middle;
-        }
+        .github-icon { width: 24px; height: 24px; fill: var(--text-light); vertical-align: middle; }
         .github-link { border: none !important; }
         .github-link:hover .github-icon { fill: var(--accent); }
         body.moto-mode .github-link:hover .github-icon { fill: var(--accent-moto); }
 
-        /* --- MEDIA QUERIES PARA MÓVIL (TAB VIEW) --- */
+        /* MÓVIL RESPONSIVE */
         @media (max-width: 900px) {
             .controls { flex-direction: column; align-items: stretch; }
             .data-inputs { flex-direction: column; align-items: stretch; }
@@ -372,16 +305,11 @@
             .task-item { flex-direction: column; gap: 10px; }
             .btn-done { width: 100%; text-align: center;}
 
-            /* Activar Pestañas en Móvil */
             .mobile-tabs { display: flex; }
+            .dashboard-grid { display: block; }
 
-            /* Cambiar Grid a una sola columna visible */
-            .dashboard-grid {
-                display: block; /* Ya no es grid, son bloques */
-            }
-
-            .card { display: none; } /* Ocultar ambas por defecto */
-            .card.active-card { display: block; animation: fadeIn 0.3s; } /* Mostrar solo la activa */
+            .card { display: none; }
+            .card.active-card { display: block; animation: fadeIn 0.3s; }
         }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -400,7 +328,7 @@
         <p id="sub-title" class="subtitle" contenteditable="true" spellcheck="false">Gestión integral con historial de acciones</p>
 
         <div class="plan-age">
-            Inicio del plan (<span id="vehicle-label">...</span>): <span id="plan-start-display">...</span> | Edad del plan: <strong id="plan-age-display">...</strong>
+            Inicio del plan: <span id="plan-start-display">...</span> | Edad del plan: <strong id="plan-age-display">...</strong>
         </div>
     </header>
 
@@ -442,22 +370,17 @@
     <button class="btn-reset" onclick="resetData()">⚠️ Borrar todo y reiniciar sistema</button>
 
     <div class="footer-version">
-        <span>Dashboard de mantenimiento &bull; <strong>v1.2</strong> &bull; Licencia <a href="LICENSE" target="_blank" title="Ver Licencia GNU GPLv3">GPLv3</a></span>
-
-        <a href="https://github.com/AngelBravoS/Dashboard-de-Mantenimiento/" target="_blank" class="github-link" title="Ver código fuente en GitHub">
-            <svg class="github-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/>
-            </svg>
+        <span>Dashboard de mantenimiento &bull; <strong>v1.2.1</strong> &bull; Licencia <a href="LICENSE" target="_blank">GPLv3</a></span>
+        <a href="https://github.com/AngelBravoS/Dashboard-de-Mantenimiento/" target="_blank" class="github-link" title="Ver código en GitHub">
+            <svg class="github-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/></svg>
         </a>
     </div>
 </div>
 
 <script>
-    // --- CONFIGURACIÓN ---
     const MS_IN_DAY = 86400000;
     const KM_WARNING_THRESHOLD = 1000;
 
-    // --- DATOS ESTRUCTURADOS ---
     const DATA = {
         car: {
             mileage: [
@@ -500,11 +423,10 @@
         }
     };
 
-    // --- ESTADO ---
     let appState = {
         mode: 'car',
-        theme: 'light', // Nueva variable para tema
-        mobileTab: 'mileage', // Nueva variable para pestaña activa en móvil
+        theme: 'light',
+        mobileTab: 'mileage',
         vehicles: {
             car: { km: 0, lastService: '', planStartDate: null },
             moto: { km: 0, lastService: '', planStartDate: null }
@@ -524,7 +446,6 @@
         render();
     };
 
-    // --- TEMA OSCURO / CLARO ---
     function toggleTheme() {
         appState.theme = appState.theme === 'light' ? 'dark' : 'light';
         applyTheme();
@@ -534,29 +455,21 @@
     function applyTheme() {
         const sun = document.getElementById('icon-sun');
         const moon = document.getElementById('icon-moon');
-
         if (appState.theme === 'dark') {
             document.body.classList.add('dark-mode');
-            sun.style.display = 'block';
-            moon.style.display = 'none';
+            sun.style.display = 'block'; moon.style.display = 'none';
         } else {
             document.body.classList.remove('dark-mode');
-            sun.style.display = 'none';
-            moon.style.display = 'block';
+            sun.style.display = 'none'; moon.style.display = 'block';
         }
     }
 
-    // --- PESTAÑAS MÓVIL ---
     function switchMobileTab(tab) {
         appState.mobileTab = tab;
         applyMobileTab();
-        // No es necesario guardar esto en LocalStorage, es preferencia de sesión,
-        // pero si quisieras persistencia en navegación se podría guardar.
     }
 
     function applyMobileTab() {
-        // Solo afecta visualmente si estamos en modo móvil (controlado por CSS media query)
-        // pero cambiamos las clases siempre para que al redimensionar funcione.
         const tabMile = document.getElementById('tab-mileage');
         const tabTime = document.getElementById('tab-time');
         const cardMile = document.getElementById('card-mileage');
@@ -576,67 +489,44 @@
     }
 
     function setupTitleListeners() {
-        const titleEl = document.getElementById('main-title');
-        const subEl = document.getElementById('sub-title');
-
-        titleEl.addEventListener('input', function() {
-            appState.mainTitle = this.innerText;
-            saveGlobalData();
+        document.getElementById('main-title').addEventListener('input', function() {
+            appState.mainTitle = this.innerText; saveGlobalData();
         });
-
-        subEl.addEventListener('input', function() {
-            appState.subTitle = this.innerText;
-            saveGlobalData();
+        document.getElementById('sub-title').addEventListener('input', function() {
+            appState.subTitle = this.innerText; saveGlobalData();
         });
     }
 
     function loadData() {
-        const saved = localStorage.getItem('mantenimientoIntegralV1_2'); // CAMBIO A v1.2
+        const saved = localStorage.getItem('mantenimientoIntegralV1_2');
 
-        if (!saved) {
-            // Migración desde v1.1
-            const oldSaved = localStorage.getItem('mantenimientoIntegralV1_1');
-            if (oldSaved) {
-                migrateData(JSON.parse(oldSaved));
+        try {
+            if (saved) {
+                appState = JSON.parse(saved);
+                // Validación básica para evitar crashes por datos corruptos
+                if(!appState.vehicles || !appState.vehicles.car) throw new Error("Estructura inválida");
             } else {
-                // Fallback a v1.0 si alguien se saltó una versión (raro pero posible)
-                const oldV1 = localStorage.getItem('mantenimientoIntegralV1_0');
-                if(oldV1) {
-                    // Migración en cadena v1.0 -> v1.1 -> v1.2 (simulada)
-                    let temp = JSON.parse(oldV1);
-                    let v1_1 = {
-                        mode: temp.mode,
-                        vehicles: {
-                            car: { km: parseInt(temp.km)||0, lastService: temp.lastService, planStartDate: temp.planStartDate || getTodayString() },
-                            moto: { km: 0, lastService: '', planStartDate: getTodayString() }
-                        },
-                        mainTitle: temp.mainTitle, subTitle: temp.subTitle,
-                        checks: temp.checks, trackingKm: temp.trackingKm, trackingTime: temp.trackingTime
-                    };
-                    migrateData(v1_1);
-                } else {
-                    // Nuevo usuario
+                const oldSaved = localStorage.getItem('mantenimientoIntegralV1_1');
+                if (oldSaved) migrateData(JSON.parse(oldSaved));
+                else {
                     appState.vehicles.car.planStartDate = getTodayString();
                     appState.vehicles.moto.planStartDate = getTodayString();
                 }
             }
-        } else {
-            appState = JSON.parse(saved);
+        } catch (e) {
+            console.error("Error cargando datos:", e);
+            // Si falla, resetear a valores seguros para que la app no se quede en blanco
+            appState.vehicles = { car: { km: 0, lastService: '', planStartDate: getTodayString() }, moto: { km: 0, lastService: '', planStartDate: getTodayString() } };
         }
 
-        // Restaurar visuales
         if (appState.mainTitle) document.getElementById('main-title').innerText = appState.mainTitle;
         if (appState.subTitle) document.getElementById('sub-title').innerText = appState.subTitle;
         if (appState.mode === 'moto') document.body.classList.add('moto-mode');
-
-        // Asegurar que existe propiedad theme en datos antiguos
-        if (!appState.theme) appState.theme = 'light';
-        if (!appState.mobileTab) appState.mobileTab = 'mileage';
     }
 
     function migrateData(oldData) {
         appState = oldData;
-        appState.theme = 'light'; // Default nuevo
+        appState.theme = 'light';
         appState.mobileTab = 'mileage';
         saveGlobalData();
     }
@@ -645,14 +535,10 @@
         const currentV = appState.vehicles[appState.mode];
         currentV.km = parseInt(document.getElementById('current-km').value) || 0;
         currentV.lastService = document.getElementById('last-service').value;
-
         localStorage.setItem('mantenimientoIntegralV1_2', JSON.stringify(appState));
     }
 
-    function getTodayString() {
-        const d = new Date();
-        return d.toISOString().split('T')[0];
-    }
+    function getTodayString() { return new Date().toISOString().split('T')[0]; }
 
     function formatDate(str) {
         if(!str) return "Nunca";
@@ -663,14 +549,10 @@
     function getPlanAge() {
         const startStr = appState.vehicles[appState.mode].planStartDate;
         if (!startStr) return {y:0, m:0};
-
         const start = new Date(startStr);
-        const now = new Date();
-        const diffTime = Math.abs(now - start);
+        const diffTime = Math.abs(new Date() - start);
         const totalDays = Math.ceil(diffTime / MS_IN_DAY);
-        const years = Math.floor(totalDays / 365);
-        const months = Math.floor((totalDays % 365) / 30);
-        return { y: years, m: months, totalYears: totalDays/365 };
+        return { y: Math.floor(totalDays/365), m: Math.floor((totalDays%365)/30), totalYears: totalDays/365 };
     }
 
     function getLastValue(trackingObj, id) {
@@ -685,10 +567,8 @@
 
     function render() {
         const vehicleData = appState.vehicles[appState.mode];
-
         document.getElementById('current-km').value = vehicleData.km || '';
         document.getElementById('last-service').value = vehicleData.lastService;
-        document.getElementById('vehicle-label').textContent = appState.mode === 'car' ? 'Coche' : 'Moto';
 
         const age = getPlanAge();
         document.getElementById('plan-start-display').textContent = formatDate(vehicleData.planStartDate);
@@ -717,8 +597,7 @@
             group.tasks.forEach((taskText, tIndex) => {
                 const id = `km-${appState.mode}-${gIndex}-${tIndex}`;
                 const lastKm = getLastValue(appState.trackingKm, id);
-                const interval = group.intervalKm;
-                const nextDue = lastKm + interval;
+                const nextDue = lastKm + group.intervalKm;
                 const remaining = nextDue - currentKm;
 
                 let btnText = `Hecho a los ${currentKm.toLocaleString()} km`;
@@ -726,27 +605,16 @@
                 let btnAction = `markKm('${id}')`;
 
                 if (lastKm === currentKm && lastKm !== 0) {
-                    btnText = "✖ Deshacer (Último)";
+                    btnText = "✖ Deshacer";
                     btnClass += " undo-mode";
                     btnAction = `unmarkKm('${id}')`;
                 }
 
-                let statusClass = '';
-                let statusMsg = '';
-
-                if (lastKm === 0) {
-                    statusClass = 'status-late';
-                    statusMsg = `🚨 Sin registro previo.`;
-                } else if (currentKm >= nextDue) {
-                    statusClass = 'status-late';
-                    statusMsg = `⛔ Pasado por ${Math.abs(remaining)} km.`;
-                } else if (remaining <= KM_WARNING_THRESHOLD) {
-                    statusClass = 'status-due';
-                    statusMsg = `⚠️ Toca en ${remaining} km.`;
-                } else {
-                    statusClass = 'status-ok';
-                    statusMsg = `✅ Faltan ${remaining} km.`;
-                }
+                let statusClass = '', statusMsg = '';
+                if (lastKm === 0) { statusClass = 'status-late'; statusMsg = `🚨 Sin registro previo.`; }
+                else if (currentKm >= nextDue) { statusClass = 'status-late'; statusMsg = `⛔ Pasado por ${Math.abs(remaining)} km.`; }
+                else if (remaining <= KM_WARNING_THRESHOLD) { statusClass = 'status-due'; statusMsg = `⚠️ Toca en ${remaining} km.`; }
+                else { statusClass = 'status-ok'; statusMsg = `✅ Faltan ${remaining} km.`; }
 
                 const item = document.createElement('div');
                 item.className = `task-item ${statusClass}`;
@@ -754,7 +622,7 @@
                     <div class="task-info">
                         <span class="task-title">${taskText}</span>
                         <span class="task-status">${statusMsg}</span>
-                        <span class="task-meta">Último: ${lastKm.toLocaleString()} km | Próx: ${nextDue.toLocaleString()} km</span>
+                        <span class="task-meta">Último: ${lastKm.toLocaleString()} km</span>
                     </div>
                     <button class="${btnClass}" onclick="${btnAction}">${btnText}</button>
                 `;
@@ -780,51 +648,26 @@
                 if (isLong) {
                     const isChecked = appState.checks[id] || false;
                     const ageObj = getPlanAge();
-                    let warnClass = '';
-                    if (!isChecked && (ageObj.totalYears >= group.milestone - 0.25)) {
-                        warnClass = 'warning-imminent';
-                    }
+                    let warnClass = (!isChecked && (ageObj.totalYears >= group.milestone - 0.25)) ? 'warning-imminent' : '';
 
                     const item = document.createElement('div');
                     item.className = `long-term-check ${isChecked ? 'completed' : ''} ${warnClass}`;
                     item.onclick = (e) => { if(e.target.type !== 'checkbox') toggleCheck(id); };
-                    item.innerHTML = `
-                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCheck('${id}')">
-                        <label>${taskText}</label>
-                    `;
+                    item.innerHTML = `<input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCheck('${id}')"><label>${taskText}</label>`;
                     groupDiv.appendChild(item);
-
                 } else {
                     const lastDate = getLastDate(appState.trackingTime, id);
                     const today = getTodayString();
                     const daysAgo = lastDate ? Math.floor((new Date() - new Date(lastDate)) / MS_IN_DAY) : Infinity;
-                    const interval = group.intervalDays;
 
-                    let btnText = "Hecho Hoy";
-                    let btnClass = "btn-done";
-                    let btnAction = `markTime('${id}')`;
+                    let btnText = "Hecho Hoy", btnClass = "btn-done", btnAction = `markTime('${id}')`;
+                    if (lastDate === today) { btnText = "✖ Deshacer"; btnClass += " undo-mode"; btnAction = `unmarkTime('${id}')`; }
 
-                    if (lastDate === today) {
-                        btnText = "✖ Deshacer (Hoy)";
-                        btnClass += " undo-mode";
-                        btnAction = `unmarkTime('${id}')`;
-                    }
-
-                    let statusClass = '';
-                    let statusMsg = '';
-                    if (daysAgo === Infinity) {
-                        statusClass = 'status-late';
-                        statusMsg = '🚨 Nunca realizado.';
-                    } else if (daysAgo > interval) {
-                        statusClass = 'status-late';
-                        statusMsg = `⛔ Hace ${daysAgo} días (Vencido).`;
-                    } else if (daysAgo > interval * 0.85) {
-                        statusClass = 'status-due';
-                        statusMsg = `⚠️ Toca pronto (Hace ${daysAgo} días).`;
-                    } else {
-                        statusClass = 'status-ok';
-                        statusMsg = `✅ Al día (Hace ${daysAgo} días).`;
-                    }
+                    let statusClass = '', statusMsg = '';
+                    if (daysAgo === Infinity) { statusClass = 'status-late'; statusMsg = '🚨 Nunca realizado.'; }
+                    else if (daysAgo > group.intervalDays) { statusClass = 'status-late'; statusMsg = `⛔ Hace ${daysAgo} días (Vencido).`; }
+                    else if (daysAgo > group.intervalDays * 0.85) { statusClass = 'status-due'; statusMsg = `⚠️ Toca pronto (Hace ${daysAgo} días).`; }
+                    else { statusClass = 'status-ok'; statusMsg = `✅ Al día (Hace ${daysAgo} días).`; }
 
                     const item = document.createElement('div');
                     item.className = `task-item ${statusClass}`;
@@ -832,7 +675,7 @@
                         <div class="task-info">
                             <span class="task-title">${taskText}</span>
                             <span class="task-status">${statusMsg}</span>
-                            <span class="task-meta">Renovar cada ${interval} días</span>
+                            <span class="task-meta">Renovar cada ${group.intervalDays} días</span>
                         </div>
                         <button class="${btnClass}" onclick="${btnAction}">${btnText}</button>
                     `;
@@ -845,53 +688,31 @@
 
     function markKm(id) {
         const current = parseInt(document.getElementById('current-km').value);
-        if (!current || current <= 0) {
-            alert("Introduce primero tu KM actual arriba.");
-            return;
-        }
+        if (!current || current <= 0) return alert("Introduce primero tu KM actual arriba.");
         if (!Array.isArray(appState.trackingKm[id])) appState.trackingKm[id] = [];
+
         const history = appState.trackingKm[id];
         if (history.length === 0 || history[history.length - 1] !== current) {
-            history.push(current);
-            history.sort((a, b) => a - b);
+            history.push(current); history.sort((a, b) => a - b);
         }
-        saveGlobalData();
-        render();
+        saveGlobalData(); render();
     }
 
-    function unmarkKm(id) {
-        if (Array.isArray(appState.trackingKm[id])) appState.trackingKm[id].pop();
-        saveGlobalData();
-        render();
-    }
+    function unmarkKm(id) { if (Array.isArray(appState.trackingKm[id])) appState.trackingKm[id].pop(); saveGlobalData(); render(); }
 
     function markTime(id) {
         if (!Array.isArray(appState.trackingTime[id])) appState.trackingTime[id] = [];
         const today = getTodayString();
         const history = appState.trackingTime[id];
-        if (history.length === 0 || history[history.length - 1] !== today) {
-            history.push(today);
-        }
-        saveGlobalData();
-        render();
+        if (history.length === 0 || history[history.length - 1] !== today) history.push(today);
+        saveGlobalData(); render();
     }
 
-    function unmarkTime(id) {
-        if (Array.isArray(appState.trackingTime[id])) appState.trackingTime[id].pop();
-        saveGlobalData();
-        render();
-    }
+    function unmarkTime(id) { if (Array.isArray(appState.trackingTime[id])) appState.trackingTime[id].pop(); saveGlobalData(); render(); }
 
-    function toggleCheck(id) {
-        appState.checks[id] = !appState.checks[id];
-        saveGlobalData();
-        render();
-    }
+    function toggleCheck(id) { appState.checks[id] = !appState.checks[id]; saveGlobalData(); render(); }
 
-    function setMode(m) {
-        appState.mode = m;
-        render();
-    }
+    function setMode(m) { appState.mode = m; render(); }
 
     function resetData() {
         if(confirm("¿Borrar TODOS los datos? Se perderá el historial.")) {

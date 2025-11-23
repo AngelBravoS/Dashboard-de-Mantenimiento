@@ -11,9 +11,7 @@
 
 Una aplicación web sencilla y directa para llevar al día el mantenimiento del coche y la moto. Sin registros, sin servidores y sin complicaciones.
 
-Metes los kilómetros, marcas lo que has hecho y la app te avisa de lo que toca. Punto.
-
-![Icono](icon.png)
+Metes los kilómetros, marcas lo que has hecho y la app te avisa de lo que toca. Fácil y sencillo.
 
 ## ¿Qué hace esto?
 
@@ -33,11 +31,11 @@ Básicamente, evita que gripes el motor o te mates por llevar las ruedas mal.
 
 No hace falta bajar nada de la tienda. Esto es una Web App.
 
-1.  Entra en la web: `https://angelbravos.github.io/Dashboard-de-Mantenimiento/` para ejecutarla.
-2.  **En Android (Chrome):** Dale a "Instalar aplicación" o en los 3 puntitos ➔"Añadir a pantalla de inicio".
-3.  **En iPhone:** Dale al botón de Compartir ➔ "Añadir a la pantalla de inicio".
+1.  **Haz clic aquí para abrir la App:** [https://angelbravos.github.io/Dashboard-de-Mantenimiento/](https://angelbravos.github.io/Dashboard-de-Mantenimiento/).
+2.  **En Android (Chrome):** Toca en "Instalar aplicación" o en los 3 puntitos ➔"Añadir a pantalla de inicio".
+3.  **En iPhone:** Toca en el botón de Compartir ➔ "Añadir a la pantalla de inicio".
 
-Se te quedará un icono en el móvil como cualquier otra app.
+Se te quedará un icono en el móvil como cualquier otra app. También puedes usarla en el PC, sólo tienes que descargar el archivo *index.html* y abrirlo en cualquier navegador.
 
 ## ⚠ Aviso (Disclaimer)
 
