@@ -1,4 +1,13 @@
-# Dashboard de Mantenimiento Integral (v1.0)
+<div align="center">
+  <img src="icon.png" alt="Logo" width="100" height="100" />
+  <h1>Dashboard de Mantenimiento Integral de Vehículos</h1>
+  <p>
+    <strong>Versión 1.2</strong> • 
+    <a href="LICENSE">Licencia GNU GPLv3</a>
+  </p>
+</div>
+
+---
 
 Una aplicación web sencilla y directa para llevar al día el mantenimiento del coche y la moto. Sin registros, sin servidores y sin complicaciones.
 
@@ -10,7 +19,7 @@ Metes los kilómetros, marcas lo que has hecho y la app te avisa de lo que toca.
 
 Básicamente, evita que gripes el motor o te mates por llevar las ruedas mal.
 
-* **Doble modo:** Un botón para el coche y otro para moto (si la tienes). Dependiendo de qué, se chequearán unas cosas u otras.
+* **Elige entre coche o moto:** Un botón para el coche y otro para moto (si la tienes). Dependiendo de qué, se chequearán unas cosas u otras.
 * **Kilómetros y Tiempo:** Controla tanto lo que se gasta por usarlo (cambios de aceite, filtros...) como lo que caduca por tiempo (ITV, neumáticos, líquidos...).
 * **Semáforo:**
     * 🟢 **Verde:** Tira millas.

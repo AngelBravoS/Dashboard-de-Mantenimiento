@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Mantenimiento Integral v1.1</title>
+    <title>Dashboard de Mantenimiento Integral de Vehículos</title>
 
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon.png">
@@ -11,21 +11,50 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
 
     <style>
+        /* --- VARIABLES DE COLOR (MODO CLARO) --- */
         :root {
             --bg-body: #f0f2f5;
             --bg-card: #ffffff;
+            --text-main: #333333;
+            --text-light: #666666;
             --primary: #2c3e50;
             --accent: #007bff;
             --accent-hover: #0056b3;
             --accent-moto: #d35400;
-            --success: #28a745;
-            --warning: #ffc107;
-            --danger: #dc3545;
-            --text-main: #333;
-            --text-light: #666;
             --border: #e1e4e8;
             --radius: 12px;
             --shadow: 0 4px 6px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.1);
+
+            /* Estados (Fondos suaves) */
+            --bg-ok: #e6ffed; --border-ok: #28a745;
+            --bg-warn: #fff9db; --border-warn: #ffc107;
+            --bg-late: #fff5f5; --border-late: #dc3545;
+
+            /* Toggle Switch */
+            --toggle-bg: #ddd;
+            --toggle-icon: #f1c40f;
+        }
+
+        /* --- VARIABLES DE COLOR (MODO OSCURO) --- */
+        body.dark-mode {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-light: #a0a0a0;
+            --primary: #ecf0f1; /* Texto encabezados más claro */
+            --accent: #4dabf7;  /* Azul más brillante para fondo oscuro */
+            --accent-hover: #339af0;
+            --accent-moto: #ff922b;
+            --border: #333333;
+            --shadow: 0 4px 6px rgba(0,0,0,0.3);
+
+            /* Estados (Fondos oscuros pero con tinte) */
+            --bg-ok: #0b2e13; --border-ok: #28a745;
+            --bg-warn: #332701; --border-warn: #ffc107;
+            --bg-late: #2c0b0e; --border-late: #dc3545;
+
+            --toggle-bg: #444;
+            --toggle-icon: #f1c40f;
         }
 
         body {
@@ -36,6 +65,7 @@
             padding: 0;
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .app-container {
@@ -47,31 +77,52 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
+        /* HEADER & TOGGLE */
         header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             padding: 20px;
             background: var(--bg-card);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
+            position: relative;
         }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+        .theme-toggle:hover { background-color: var(--bg-body); }
+        .theme-icon { width: 24px; height: 24px; fill: var(--text-main); }
 
         [contenteditable="true"] {
             border-bottom: 1px dashed transparent;
-            transition: border 0.3s, background 0.3s;
             padding: 0 5px;
             border-radius: 4px;
         }
         [contenteditable="true"]:hover {
-            border-bottom: 1px dashed #ccc;
-            background-color: #f9f9f9;
+            border-bottom: 1px dashed var(--text-light);
+            background-color: rgba(0,0,0,0.05);
             cursor: text;
         }
         [contenteditable="true"]:focus {
             outline: none;
-            background-color: #eef;
+            background-color: rgba(0,0,0,0.05);
             border-bottom: 1px solid var(--accent);
         }
 
@@ -89,6 +140,7 @@
         .plan-age strong { color: var(--accent); font-size: 1.1rem; }
         body.moto-mode .plan-age strong { color: var(--accent-moto); }
 
+        /* CONTROLES PRINCIPALES */
         .controls {
             display: flex;
             flex-wrap: wrap;
@@ -98,7 +150,7 @@
             padding: 20px;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             gap: 20px;
         }
 
@@ -116,18 +168,65 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .btn-car { background-color: var(--border); color: var(--text-light); }
-        .btn-car.active { background-color: var(--accent); color: white; box-shadow: 0 4px 8px rgba(0,123,255,0.3); }
-        .btn-moto { background-color: var(--border); color: var(--text-light); }
-        .btn-moto.active { background-color: var(--accent-moto); color: white; box-shadow: 0 4px 8px rgba(211,84,0,0.3); }
+        .btn-car { background-color: var(--bg-body); color: var(--text-light); border: 1px solid var(--border); }
+        .btn-car.active { background-color: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 8px rgba(0,123,255,0.3); }
+
+        .btn-moto { background-color: var(--bg-body); color: var(--text-light); border: 1px solid var(--border); }
+        .btn-moto.active { background-color: var(--accent-moto); color: white; border-color: var(--accent-moto); box-shadow: 0 4px 8px rgba(211,84,0,0.3); }
 
         .input-group { display: flex; flex-direction: column; gap: 5px; }
         .input-group label { font-size: 0.85rem; font-weight: bold; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
-        input { padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; background: #f9f9f9; transition: border 0.2s; width: 140px;}
-        input:focus { outline: none; border-color: var(--accent); background: #fff; }
 
-        .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 25px; flex-grow: 1; }
-        @media(min-width: 900px) { .dashboard-grid { grid-template-columns: 1fr 1fr; } }
+        input {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            background: var(--bg-body);
+            color: var(--text-main);
+            transition: border 0.2s;
+            width: 140px;
+        }
+        input:focus { outline: none; border-color: var(--accent); }
+        /* Invertir el icono de calendario en dark mode para que se vea */
+        body.dark-mode input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+
+        /* --- PESTAÑAS MÓVIL (OCULTAS EN PC) --- */
+        .mobile-tabs {
+            display: none; /* Por defecto oculto */
+            margin-bottom: 15px;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-weight: bold;
+            color: var(--text-light);
+            cursor: pointer;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .tab-btn.active-tab {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            background-color: rgba(0,0,0,0.02);
+        }
+        body.moto-mode .tab-btn.active-tab {
+            color: var(--accent-moto);
+            border-bottom-color: var(--accent-moto);
+        }
+
+        /* GRID DASHBOARD */
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; flex-grow: 1; }
 
         .card {
             background: var(--bg-card);
@@ -140,11 +239,12 @@
         h2 { margin-top: 0; padding-bottom: 15px; border-bottom: 2px solid var(--bg-body); color: var(--primary); font-size: 1.4rem; display: flex; align-items: center; justify-content: space-between; }
         .badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; background: var(--bg-body); color: var(--text-light); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
 
+        /* GRUPOS Y TAREAS */
         .task-group { margin-bottom: 25px; }
         .group-header {
             font-weight: 700;
             color: var(--primary);
-            background: #f8f9fa;
+            background: var(--bg-body);
             padding: 8px 12px;
             border-radius: 6px;
             margin-bottom: 10px;
@@ -152,7 +252,7 @@
             display: block;
         }
         body.moto-mode .group-header { border-left-color: var(--accent-moto); }
-        .group-header.long-term { background-color: #f8d7da; color: #721c24; border-left-color: var(--danger) !important; }
+        .group-header.long-term { background-color: var(--bg-late); color: #e74c3c; border-left-color: var(--danger) !important; }
 
         .task-item {
             display: flex;
@@ -163,13 +263,15 @@
             border-radius: 8px;
             border: 1px solid var(--border);
             transition: all 0.2s;
+            background-color: var(--bg-card);
         }
 
         .task-info { flex-grow: 1; margin-right: 10px; }
-        .task-title { font-weight: 600; font-size: 0.95rem; display: block; margin-bottom: 4px; }
-        .task-status { font-size: 0.85rem; display: block; color: #555; }
-        .task-meta { font-size: 0.75rem; color: #888; display: block; margin-top: 2px; font-style: italic;}
+        .task-title { font-weight: 600; font-size: 0.95rem; display: block; margin-bottom: 4px; color: var(--text-main); }
+        .task-status { font-size: 0.85rem; display: block; color: var(--text-main); opacity: 0.8; }
+        .task-meta { font-size: 0.75rem; color: var(--text-light); display: block; margin-top: 2px; font-style: italic;}
 
+        /* BOTONES DE ACCIÓN */
         .btn-done {
             padding: 8px 12px;
             background-color: var(--accent);
@@ -186,19 +288,21 @@
         .btn-done:hover { opacity: 0.9; }
 
         .btn-done.undo-mode {
-            background-color: #fff;
+            background-color: transparent;
             color: var(--danger);
             border: 1px solid var(--danger);
         }
         .btn-done.undo-mode:hover {
             background-color: var(--danger);
-            color: #fff;
+            color: white;
         }
 
-        .task-item.status-ok { background-color: #e6ffed; border-left: 4px solid var(--success); }
-        .task-item.status-due { background-color: #fff9db; border-left: 4px solid var(--warning); }
-        .task-item.status-late { background-color: #fff5f5; border-left: 4px solid var(--danger); }
+        /* ESTADOS SEMÁFORO */
+        .task-item.status-ok { background-color: var(--bg-ok); border-left: 4px solid var(--border-ok); }
+        .task-item.status-due { background-color: var(--bg-warn); border-left: 4px solid var(--border-warn); }
+        .task-item.status-late { background-color: var(--bg-late); border-left: 4px solid var(--border-late); }
 
+        /* CHECKBOX LARGO PLAZO */
         .long-term-check {
             display: flex;
             align-items: center;
@@ -208,21 +312,22 @@
             cursor: pointer;
             border: 1px solid transparent;
         }
-        .long-term-check:hover { background-color: #f1f3f5; }
+        .long-term-check:hover { background-color: var(--bg-body); }
         .long-term-check input[type="checkbox"] { margin-right: 15px; transform: scale(1.3); cursor: pointer; accent-color: var(--accent); }
         body.moto-mode .long-term-check input[type="checkbox"] { accent-color: var(--accent-moto); }
-        .long-term-check.completed label { text-decoration: line-through; color: #adb5bd; }
+        .long-term-check.completed label { text-decoration: line-through; color: var(--text-light); opacity: 0.7; }
 
         .long-term-check.warning-imminent {
-            background-color: #fff3cd;
-            border: 1px solid var(--warning);
+            background-color: var(--bg-warn);
+            border: 1px solid var(--border-warn);
         }
-        .long-term-check.warning-imminent label { color: #856404; font-weight: bold; }
+        .long-term-check.warning-imminent label { color: #d35400; font-weight: bold; }
+        body.dark-mode .long-term-check.warning-imminent label { color: #ffc107; }
 
-        .btn-reset { background-color: #fff; color: #dc3545; border: 2px solid #dc3545; width: 100%; margin-top: 30px; padding: 15px; margin-bottom: 20px;}
-        .btn-reset:hover { background-color: #dc3545; color: white; }
+        .btn-reset { background-color: transparent; color: var(--danger); border: 2px solid var(--danger); width: 100%; margin-top: 30px; padding: 15px; margin-bottom: 20px;}
+        .btn-reset:hover { background-color: var(--danger); color: white; }
 
-        /* FOOTER CON ESTILO Y GPL */
+        /* FOOTER */
         .footer-version {
             display: flex;
             justify-content: center;
@@ -234,6 +339,7 @@
             border-top: 1px solid var(--border);
             margin-bottom: 20px;
             gap: 15px;
+            flex-wrap: wrap;
         }
 
         .footer-version a {
@@ -247,7 +353,6 @@
             border-bottom-style: solid;
         }
 
-        /* Icono GitHub SVG */
         .github-icon {
             width: 24px;
             height: 24px;
@@ -255,28 +360,47 @@
             transition: fill 0.3s;
             vertical-align: middle;
         }
-        .github-link { border: none !important; } /* Quitar subrayado al icono */
+        .github-link { border: none !important; }
         .github-link:hover .github-icon { fill: var(--accent); }
         body.moto-mode .github-link:hover .github-icon { fill: var(--accent-moto); }
 
-        @media (max-width: 600px) {
+        /* --- MEDIA QUERIES PARA MÓVIL (TAB VIEW) --- */
+        @media (max-width: 900px) {
             .controls { flex-direction: column; align-items: stretch; }
             .data-inputs { flex-direction: column; align-items: stretch; }
             .input-group input { width: 100%; box-sizing: border-box; }
             .task-item { flex-direction: column; gap: 10px; }
             .btn-done { width: 100%; text-align: center;}
+
+            /* Activar Pestañas en Móvil */
+            .mobile-tabs { display: flex; }
+
+            /* Cambiar Grid a una sola columna visible */
+            .dashboard-grid {
+                display: block; /* Ya no es grid, son bloques */
+            }
+
+            .card { display: none; } /* Ocultar ambas por defecto */
+            .card.active-card { display: block; animation: fadeIn 0.3s; } /* Mostrar solo la activa */
         }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <header>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Alternar modo oscuro">
+            <svg class="theme-icon" id="icon-sun" style="display:none" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>
+            <svg class="theme-icon" id="icon-moon" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+        </button>
+
         <h1 id="main-title" contenteditable="true" spellcheck="false">Dashboard de Mantenimiento</h1>
         <p id="sub-title" class="subtitle" contenteditable="true" spellcheck="false">Gestión integral con historial de acciones</p>
 
         <div class="plan-age">
-            Inicio del plan: <span id="plan-start-display">...</span> | Edad del plan: <strong id="plan-age-display">0 años y 0 meses</strong>
+            Inicio del plan (<span id="vehicle-label">...</span>): <span id="plan-start-display">...</span> | Edad del plan: <strong id="plan-age-display">...</strong>
         </div>
     </header>
 
@@ -298,13 +422,18 @@
         </div>
     </div>
 
+    <div class="mobile-tabs">
+        <button class="tab-btn active-tab" id="tab-mileage" onclick="switchMobileTab('mileage')">Por Kilometraje</button>
+        <button class="tab-btn" id="tab-time" onclick="switchMobileTab('time')">Por Tiempo</button>
+    </div>
+
     <div class="dashboard-grid">
-        <div class="card">
+        <div class="card active-card" id="card-mileage">
             <h2>Revisiones por Kilometraje <span class="badge">USO</span></h2>
             <div id="mileage-list"></div>
         </div>
 
-        <div class="card">
+        <div class="card" id="card-time">
             <h2>Revisiones por Tiempo <span class="badge">EDAD</span></h2>
             <div id="time-list"></div>
         </div>
@@ -313,9 +442,9 @@
     <button class="btn-reset" onclick="resetData()">⚠️ Borrar todo y reiniciar sistema</button>
 
     <div class="footer-version">
-        <span>Garaje Digital &bull; <strong>v1.1</strong> &bull; Licencia <a href="LICENSE" target="_blank" title="Ver Licencia GNU GPLv3">GPLv3</a></span>
+        <span>Dashboard de mantenimiento &bull; <strong>v1.2</strong> &bull; Licencia <a href="LICENSE" target="_blank" title="Ver Licencia GNU GPLv3">GPLv3</a></span>
 
-        <a href="https://github.com/tu-usuario/tu-repositorio" target="_blank" class="github-link" title="Ver código fuente en GitHub">
+        <a href="https://github.com/AngelBravoS/Dashboard-de-Mantenimiento/" target="_blank" class="github-link" title="Ver código fuente en GitHub">
             <svg class="github-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/>
             </svg>
@@ -374,21 +503,77 @@
     // --- ESTADO ---
     let appState = {
         mode: 'car',
-        km: 0,
-        lastService: '',
-        planStartDate: null,
+        theme: 'light', // Nueva variable para tema
+        mobileTab: 'mileage', // Nueva variable para pestaña activa en móvil
+        vehicles: {
+            car: { km: 0, lastService: '', planStartDate: null },
+            moto: { km: 0, lastService: '', planStartDate: null }
+        },
         mainTitle: 'Dashboard de Mantenimiento',
         subTitle: 'Gestión integral con historial de acciones',
         checks: {},
-        trackingKm: {},    // Arrays
-        trackingTime: {}   // Arrays
+        trackingKm: {},
+        trackingTime: {}
     };
 
     window.onload = function() {
         loadData();
         setupTitleListeners();
+        applyTheme();
+        applyMobileTab();
         render();
     };
+
+    // --- TEMA OSCURO / CLARO ---
+    function toggleTheme() {
+        appState.theme = appState.theme === 'light' ? 'dark' : 'light';
+        applyTheme();
+        saveGlobalData();
+    }
+
+    function applyTheme() {
+        const sun = document.getElementById('icon-sun');
+        const moon = document.getElementById('icon-moon');
+
+        if (appState.theme === 'dark') {
+            document.body.classList.add('dark-mode');
+            sun.style.display = 'block';
+            moon.style.display = 'none';
+        } else {
+            document.body.classList.remove('dark-mode');
+            sun.style.display = 'none';
+            moon.style.display = 'block';
+        }
+    }
+
+    // --- PESTAÑAS MÓVIL ---
+    function switchMobileTab(tab) {
+        appState.mobileTab = tab;
+        applyMobileTab();
+        // No es necesario guardar esto en LocalStorage, es preferencia de sesión,
+        // pero si quisieras persistencia en navegación se podría guardar.
+    }
+
+    function applyMobileTab() {
+        // Solo afecta visualmente si estamos en modo móvil (controlado por CSS media query)
+        // pero cambiamos las clases siempre para que al redimensionar funcione.
+        const tabMile = document.getElementById('tab-mileage');
+        const tabTime = document.getElementById('tab-time');
+        const cardMile = document.getElementById('card-mileage');
+        const cardTime = document.getElementById('card-time');
+
+        if (appState.mobileTab === 'mileage') {
+            tabMile.classList.add('active-tab');
+            tabTime.classList.remove('active-tab');
+            cardMile.classList.add('active-card');
+            cardTime.classList.remove('active-card');
+        } else {
+            tabMile.classList.remove('active-tab');
+            tabTime.classList.add('active-tab');
+            cardMile.classList.remove('active-card');
+            cardTime.classList.add('active-card');
+        }
+    }
 
     function setupTitleListeners() {
         const titleEl = document.getElementById('main-title');
@@ -406,39 +591,62 @@
     }
 
     function loadData() {
-        const saved = localStorage.getItem('mantenimientoIntegralV1_1');
+        const saved = localStorage.getItem('mantenimientoIntegralV1_2'); // CAMBIO A v1.2
 
         if (!saved) {
-            // Migración desde v3 si existe
-            const oldSaved = localStorage.getItem('mantenimientoIntegralV3');
+            // Migración desde v1.1
+            const oldSaved = localStorage.getItem('mantenimientoIntegralV1_1');
             if (oldSaved) {
                 migrateData(JSON.parse(oldSaved));
             } else {
-                appState.planStartDate = getTodayString();
+                // Fallback a v1.0 si alguien se saltó una versión (raro pero posible)
+                const oldV1 = localStorage.getItem('mantenimientoIntegralV1_0');
+                if(oldV1) {
+                    // Migración en cadena v1.0 -> v1.1 -> v1.2 (simulada)
+                    let temp = JSON.parse(oldV1);
+                    let v1_1 = {
+                        mode: temp.mode,
+                        vehicles: {
+                            car: { km: parseInt(temp.km)||0, lastService: temp.lastService, planStartDate: temp.planStartDate || getTodayString() },
+                            moto: { km: 0, lastService: '', planStartDate: getTodayString() }
+                        },
+                        mainTitle: temp.mainTitle, subTitle: temp.subTitle,
+                        checks: temp.checks, trackingKm: temp.trackingKm, trackingTime: temp.trackingTime
+                    };
+                    migrateData(v1_1);
+                } else {
+                    // Nuevo usuario
+                    appState.vehicles.car.planStartDate = getTodayString();
+                    appState.vehicles.moto.planStartDate = getTodayString();
+                }
             }
         } else {
             appState = JSON.parse(saved);
         }
 
-        appState.km = parseInt(appState.km) || 0;
-        if (!appState.trackingKm) appState.trackingKm = {};
-        if (!appState.trackingTime) appState.trackingTime = {};
-
+        // Restaurar visuales
         if (appState.mainTitle) document.getElementById('main-title').innerText = appState.mainTitle;
         if (appState.subTitle) document.getElementById('sub-title').innerText = appState.subTitle;
+        if (appState.mode === 'moto') document.body.classList.add('moto-mode');
 
-        if(appState.mode === 'moto') document.body.classList.add('moto-mode');
+        // Asegurar que existe propiedad theme en datos antiguos
+        if (!appState.theme) appState.theme = 'light';
+        if (!appState.mobileTab) appState.mobileTab = 'mileage';
     }
 
     function migrateData(oldData) {
         appState = oldData;
+        appState.theme = 'light'; // Default nuevo
+        appState.mobileTab = 'mileage';
         saveGlobalData();
     }
 
     function saveGlobalData() {
-        appState.km = parseInt(document.getElementById('current-km').value) || 0;
-        appState.lastService = document.getElementById('last-service').value;
-        localStorage.setItem('mantenimientoIntegralV1_1', JSON.stringify(appState));
+        const currentV = appState.vehicles[appState.mode];
+        currentV.km = parseInt(document.getElementById('current-km').value) || 0;
+        currentV.lastService = document.getElementById('last-service').value;
+
+        localStorage.setItem('mantenimientoIntegralV1_2', JSON.stringify(appState));
     }
 
     function getTodayString() {
@@ -453,8 +661,10 @@
     }
 
     function getPlanAge() {
-        if (!appState.planStartDate) return {y:0, m:0};
-        const start = new Date(appState.planStartDate);
+        const startStr = appState.vehicles[appState.mode].planStartDate;
+        if (!startStr) return {y:0, m:0};
+
+        const start = new Date(startStr);
         const now = new Date();
         const diffTime = Math.abs(now - start);
         const totalDays = Math.ceil(diffTime / MS_IN_DAY);
@@ -474,11 +684,14 @@
     }
 
     function render() {
-        document.getElementById('current-km').value = appState.km || '';
-        document.getElementById('last-service').value = appState.lastService;
+        const vehicleData = appState.vehicles[appState.mode];
+
+        document.getElementById('current-km').value = vehicleData.km || '';
+        document.getElementById('last-service').value = vehicleData.lastService;
+        document.getElementById('vehicle-label').textContent = appState.mode === 'car' ? 'Coche' : 'Moto';
 
         const age = getPlanAge();
-        document.getElementById('plan-start-display').textContent = formatDate(appState.planStartDate);
+        document.getElementById('plan-start-display').textContent = formatDate(vehicleData.planStartDate);
         document.getElementById('plan-age-display').textContent = `${age.y} años y ${age.m} meses`;
 
         const mode = appState.mode;
@@ -494,6 +707,7 @@
     function renderMileageColumn(groups) {
         const container = document.getElementById('mileage-list');
         container.innerHTML = '';
+        const currentKm = appState.vehicles[appState.mode].km || 0;
 
         groups.forEach((group, gIndex) => {
             const groupDiv = document.createElement('div');
@@ -504,7 +718,6 @@
                 const id = `km-${appState.mode}-${gIndex}-${tIndex}`;
                 const lastKm = getLastValue(appState.trackingKm, id);
                 const interval = group.intervalKm;
-                const currentKm = appState.km;
                 const nextDue = lastKm + interval;
                 const remaining = nextDue - currentKm;
 
@@ -677,13 +890,12 @@
 
     function setMode(m) {
         appState.mode = m;
-        saveGlobalData();
         render();
     }
 
     function resetData() {
         if(confirm("¿Borrar TODOS los datos? Se perderá el historial.")) {
-            localStorage.removeItem('mantenimientoIntegralV1_1');
+            localStorage.removeItem('mantenimientoIntegralV1_2');
             location.reload();
         }
     }
